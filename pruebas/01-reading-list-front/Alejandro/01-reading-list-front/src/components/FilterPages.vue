@@ -15,7 +15,7 @@
 
 <template>
     <div>
-        <label for="pages">Filtrar por páginas</label>
+        <label class="mr-4" for="pages">Filtrar por páginas</label>
         <input class="mr-5" type="range" name="pages" id="pages" min="0" :max="maxPages" v-model="selectedPages" @input="emitPagesFilter">
         <span class="text-white">{{ selectedPages }}</span>
     </div>

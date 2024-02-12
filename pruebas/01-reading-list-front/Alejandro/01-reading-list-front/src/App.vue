@@ -3,8 +3,8 @@
   import booksData from './assets/books.json';
   import FilterGenre from './components/FilterGenre.vue';
   import FilterPages from './components/FilterPages.vue';
+  import BookStar from './components/BookStar.vue';
   import { ref, computed } from 'vue';
-  import type { Book } from '@/bookTypes';
 
   const books = booksData.library;
   const selectedGenre = ref('');
@@ -32,31 +32,21 @@
     selectedPages.value = pages;
   };
 
-  // Agregar método para alternar entre favorito y no favorito
-  const toggleStarred = (book: Book) => {
-    book.isStarred = !book.isStarred;
-  };
-  
-
 </script>
 
 <template>
-  <div class="bg-black p-8">
-    <h1 class="font-comic-sans text-white">{{ filteredBooks.length }} Libros disponibles</h1>
+  <div class="bg-black p-8 text-white">
+    <h1 class="mb-6 text-4xl font-bold">Librería📚</h1>
+    <h1 class="flex justify-between items-center mb-4">{{ filteredBooks.length }} Libros disponibles</h1>
     <div class="flex items-center space-x-4">
       <FilterGenre @genreFilter="handleGenreFilter"></FilterGenre>
       <FilterPages @pagesFilter="handlePagesFilter"></FilterPages>
     </div>
+    <div class="mt-4">
+      <h3>Pulsa click sobre los libros para añadirlos a favoritos</h3>
+    </div>
     <div class="grid grid-cols-3 gap-4 mt-4">
-      <div v-for="(book, index) in filteredBooks" :key="index" class="p-4 border border-gray-300 rounded-lg">
-        <img :src="book.book.cover" alt="Portada del libro" class="mx-auto mb-4 w-40 h-56 object-cover">
-        <h2 @click="() => toggleStarred(book)" class="text-xl font-semibold text-white">{{ book.book.isStarred ? '⭐ ' : '' }} Título: {{ book.book.title }}</h2>
-        <p class="text-gray-600 text-white">Género: {{ book.book.genre }}</p>
-        <p class="mt-2 text-white">Autor: {{ book.book.author.name }}</p>
-        <p class="text-white">Páginas: {{ book.book.pages }}</p>
-        <p class="text-white">Año: {{ book.book.year }}</p>
-        <p class="text-white">ISBN: {{ book.book.ISBN }}</p>
-      </div>
+      <BookStar v-for="(book, index) in filteredBooks" :key="index" :book="book"></BookStar>
     </div>
     <div class="mt-6">
     </div>
