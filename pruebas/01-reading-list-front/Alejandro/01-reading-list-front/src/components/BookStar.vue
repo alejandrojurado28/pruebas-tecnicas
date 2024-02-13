@@ -1,5 +1,5 @@
 <script setup lang="ts">
-    import { defineProps, ref, onMounted } from 'vue';
+    import { defineProps, defineEmits, ref, onMounted, onUnmounted } from 'vue';
 
     const props = defineProps({
         book: {
@@ -10,9 +10,12 @@
 
     const isFavorite = ref(false);
 
+    const emit = defineEmits(['favorite-toggled']);
+
     const toggleFavorite = () => {
         isFavorite.value = !isFavorite.value;
         localStorage.setItem(`favorite_${props.book.book.ISBN}`, JSON.stringify(isFavorite.value));
+        emit('favorite-toggled', { book: props.book, isFavorite: isFavorite.value });
     };
 
     onMounted(() => {
@@ -20,6 +23,11 @@
         if (storedFavorite !== null) {
             isFavorite.value = JSON.parse(storedFavorite);
         }
+    });
+
+    // Limpiar el evento al desmontar el componente
+    onUnmounted(() => {
+        localStorage.removeItem(`favorite_${props.book.book.ISBN}`);
     });
 </script>
 
