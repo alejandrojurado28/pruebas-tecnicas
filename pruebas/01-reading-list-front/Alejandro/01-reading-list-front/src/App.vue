@@ -127,14 +127,4 @@
 
 <style scoped>
   @import url('https://fonts.googleapis.com/css2?family=Comic+Sans+MS&display=swap');
-
-  /* Ajustes de espaciado y tamaño */
-  .grid-cols-1 {
-    grid-template-columns: repeat(1, minmax(0, 1fr));
-  }
-
-  /* Ajustes de espaciado entre elementos */
-  .gap-4 {
-    gap: 1rem; /* Puedes ajustar este valor según sea necesario */
-  }
 </style>
