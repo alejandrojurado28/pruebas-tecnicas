@@ -105,8 +105,8 @@
         ></BookStar>
       </div>
     </div>
-    <div class="col-span-1">
-      <div class="p-4 border border-gray-300 rounded-lg relative grid grid-cols-2 gap-4">
+    <div class="col-span-1 flex flex-col h-screen">
+      <div class="p-4 border border-gray-300 rounded-lg relative flex-1 grid grid-cols-2 gap-4">
         <h1 class="text-4x1 font-bold col-span-2">Lista de lectura</h1>
         <div v-for="(book, index) in favoriteBooks" :key="index">
           <img :src="book.book.cover" alt="Portada del libro" class="mx-auto mb-4 w-40 h-56 object-cover">
@@ -126,4 +126,14 @@
 
 <style scoped>
   @import url('https://fonts.googleapis.com/css2?family=Comic+Sans+MS&display=swap');
+
+  /* Ajustes de espaciado y tamaño */
+  .grid-cols-1 {
+    grid-template-columns: repeat(1, minmax(0, 1fr));
+  }
+
+  /* Ajustes de espaciado entre elementos */
+  .gap-4 {
+    gap: 1rem; /* Puedes ajustar este valor según sea necesario */
+  }
 </style>
