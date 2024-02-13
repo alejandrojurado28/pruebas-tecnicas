@@ -87,6 +87,7 @@
     <div>
       <h1 class="mb-6 text-4xl font-bold">Librería📚</h1>
       <h1 class="mb-4">{{ filteredBooks.length }} Libros disponibles</h1>
+      <h1 class="mb-4">{{ favoriteBooks.length }} Libros en la lista de lectura</h1>
       <div class="flex items-center space-x-4 mb-4">
         <div>
           <FilterGenre @genreFilter="handleGenreFilter"></FilterGenre>
