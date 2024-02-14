@@ -1,9 +1,9 @@
 <script setup lang="ts">
   import 'tailwindcss/tailwind.css';
   import { ref, defineProps, onMounted } from 'vue';
-  import { useRoute } from 'vue-router';
+  import { useRoute, useRouter } from 'vue-router';
   import productsData from '../assets/products.json';
-  import router from '@/router';
+  import axios from 'axios';
 
   // Define una interfaz para representar la estructura del objeto book
   interface Producto {
@@ -28,13 +28,14 @@
   }
 
   const furgo = '/public/furgoneta.png';
-  const productos = ref([]);
+  const productos = ref<Producto[]>([]);
   const searchQuery = ref('');
+  const productosFiltrados = ref<Producto[]>([]);
 
   const route = useRoute();
+  const router = useRouter()
 
   // Filtrar productos por título
-  const productosFiltrados = ref<Producto[]>([]);
   onMounted(() => {
     const query = route.query.search as string;
     if (query) {
@@ -45,11 +46,10 @@
   });
 
   const buscar = () => {
-  productosFiltrados.value = productsData.products.filter(producto => {
-    return producto.title.toLowerCase().includes(searchQuery.value.toLowerCase());
-  });
-};
-
+    productosFiltrados.value = productsData.products.filter(producto => {
+      return producto.title.toLowerCase().includes(searchQuery.value.toLowerCase());
+    });
+  };
 </script>
 
 <template>

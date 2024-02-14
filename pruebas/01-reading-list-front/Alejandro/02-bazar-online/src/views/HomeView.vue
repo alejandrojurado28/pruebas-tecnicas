@@ -1,6 +1,6 @@
 <script setup lang="ts">
   import 'tailwindcss/tailwind.css';
-  import { ref } from 'vue';
+  import { ref, onMounted } from 'vue';
   import { useRouter } from 'vue-router';
 
   const router = useRouter();
@@ -18,7 +18,7 @@
     } else {
       console.log("El término de búsqueda está vacío.");
     }
-}
+  }
 </script>
 
 <template>
