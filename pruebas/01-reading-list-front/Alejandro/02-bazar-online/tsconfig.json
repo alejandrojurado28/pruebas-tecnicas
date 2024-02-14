@@ -10,5 +10,9 @@
     {
       "path": "./tsconfig.vitest.json"
     }
-  ]
+  ],
+  "compilerOptions": {
+    "module": "ESNext", // o "module": "ES6"
+    // Otras opciones de configuración aquí...
+  },
 }
