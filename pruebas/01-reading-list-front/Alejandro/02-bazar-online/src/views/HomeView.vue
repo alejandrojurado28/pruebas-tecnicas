@@ -1,22 +1,24 @@
 <script setup lang="ts">
   import 'tailwindcss/tailwind.css';
+  import { ref } from 'vue';
   import { useRouter } from 'vue-router';
 
   const router = useRouter();
 
   const furgo = '/public/furgoneta.png';
 
-  const resultadoBusqueda = '';
+  const resultadoBusqueda = ref('');
 
-  /*const irAResultados = () => {
-    router.push({path: '/items', query: { q: resultadoBusqueda.trim() }});
-  }*/
-
+  // Función para realizar la búsqueda y redirigir al usuario a la página de resultados
   const busqueda = () => {
-    //if (resultadoBusqueda.trim() !== '') {
-      router.push({ path: '/items', query: { search: resultadoBusqueda.trim() }});
-    //}
-  }
+    console.log("Resultado de la búsqueda:", resultadoBusqueda);
+    if (resultadoBusqueda.value !== '') {
+      console.log("Realizando la búsqueda...");
+      router.push({ name: 'Items', query: { search: resultadoBusqueda.value }});
+    } else {
+      console.log("El término de búsqueda está vacío.");
+    }
+}
 </script>
 
 <template>
