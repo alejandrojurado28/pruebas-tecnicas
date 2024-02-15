@@ -39,13 +39,13 @@
     try {
       const response = await axios.get('https://productos-5248a-default-rtdb.europe-west1.firebasedatabase.app/products.json');
       productos.value = Object.values(response.data);
-      filterProducts(route.query.search as string);
+      filtrarProductos(route.query.search as string);
     } catch (error) {
       console.error('Error fetching data:', error);
     }
   };
 
-  const filterProducts = (searchQuery: string) => {
+  const filtrarProductos = (searchQuery: string) => {
     productosFiltrados.value = productos.value.filter(producto => {
       return producto.title.toLowerCase().includes(searchQuery.toLowerCase());
     });
