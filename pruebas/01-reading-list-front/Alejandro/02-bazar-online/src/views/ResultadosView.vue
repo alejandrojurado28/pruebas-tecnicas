@@ -70,7 +70,7 @@
   <div class="mt-4 fuente flex content-center justify-center font-serif">
     <img width="60px" :src="furgo" alt="img_furgoneta">
     <input v-model="searchQuery" class=" ml-4 bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" type="text">
-    <button @click="buscar" class="text-white bg-gradient-to-r from-pink-400 via-pink-500 to-pink-600 hover:bg-gradient-to-br focus:ring-4 focus:outline-none focus:ring-pink-300 dark:focus:ring-pink-800 font-medium rounded-lg text-sm px-5 py-2.5 text-center me-2 mb-2">Buscar</button>
+    <button @click="buscar" class="px-4 py-2 rounded-lg bg-pink-500 text-white font-bold ml-4">Buscar</button>
   </div>
   <p class="text-center">Resultados de búsqueda de "{{ route.query.search }}": {{ productosFiltrados.length }}</p>
   <div>
