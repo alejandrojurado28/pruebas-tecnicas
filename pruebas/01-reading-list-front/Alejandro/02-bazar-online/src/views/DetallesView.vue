@@ -19,6 +19,8 @@
         category: string;
         thumbnail: string;
         images: string[];
+        cantidad: number;
+        nuevoprecio: number;
     }
 
     // Definir un ref para almacenar los detalles del producto
@@ -33,13 +35,16 @@
         brand: '',
         category: '',
         thumbnail: '',
-        images: []
+        images: [],
+        cantidad: 1,
+        nuevoprecio: 0
     });
 
     const furgo = '/public/furgoneta.png';
     const productosCarrito = ref<Producto[]>([]);
     const mostrarProdsCarrito = ref(false);
-    const totalPrecio = ref(0)
+    const totalPrecio = ref<number>(0);
+    const totalCarrito = ref<number>(0);
 
     const obtenerDetallesProducto = async (productoId: number) => {
         try {
@@ -58,11 +63,18 @@
         cargarProductosDesdeLocalStorage();
     });
 
-    const emit = defineEmits(['productos-carrito']);
-
     const agregarAlCarrito = (producto: Producto) => {
-        productosCarrito.value.push(producto);
-        emit('productos-carrito', producto);
+        // Clonar el producto para evitar referencias
+        const productoClonado = {...producto};
+        // Actualizar el precio del producto clonado con el nuevo precio
+        productoClonado.nuevoprecio = productoClonado.price;
+        // Agregar el producto clonado al carrito
+        productosCarrito.value.push(productoClonado);
+        // Actualizar el total del carrito
+        totalCarrito.value += productoClonado.price;
+        // Actualizar el total del precio
+        totalPrecio.value += productoClonado.price;
+        // Actualizar el local storage
         actualizarLocalStorage();
     }
 
@@ -72,14 +84,18 @@
 
     const cargarProductosDesdeLocalStorage = () => {
         const productosGuardados = localStorage.getItem('productosCarrito');
+        const cantidadesGuardadas = localStorage.getItem('totalCarrito');
         if (productosGuardados) {
             productosCarrito.value = JSON.parse(productosGuardados);
+        }
+        if (cantidadesGuardadas) {
+            totalCarrito.value = parseFloat(cantidadesGuardadas);
         }
     }
 
     const obtenerPrecioTotal = () => {
-        const total = productosCarrito.value.reduce((total, producto) => total + producto.price, 0);
-        return total;
+        totalPrecio.value = productosCarrito.value.reduce((total, producto) => total + producto.nuevoprecio, 0);
+        return totalPrecio;
     }
 
     const eliminarDelCarrito = (productoEliminar: Producto) => {
@@ -96,6 +112,42 @@
             estrellas.push(i);
         }
         return estrellas;
+    }
+
+    const aumentarCantidad = (productoAnadir: Producto) => {
+        const indice = productosCarrito.value.findIndex(producto => producto.id === productoAnadir.id);
+        if (indice !== -1) {
+            // Actualizar la cantidad y el nuevo precio
+            productosCarrito.value[indice].cantidad++;
+            productosCarrito.value[indice].nuevoprecio += productoAnadir.price;
+            // Actualizar el total del carrito
+            totalCarrito.value += productoAnadir.price;
+            // Sumar el precio del producto al totalPrecio
+            totalPrecio.value += productoAnadir.price;
+            // Actualizar el local storage
+            actualizarLocalStorage();
+            localStorage.setItem('totalCarrito', totalCarrito.value.toString());
+            // Recalcular el total del precio
+            obtenerPrecioTotal();
+        }
+    }
+
+    const disminuirCantidad = (productoDisminuir: Producto) => {
+        const indice = productosCarrito.value.findIndex(producto => producto.id === productoDisminuir.id);
+        if (indice !== -1) {
+            if (productosCarrito.value[indice].cantidad > 1) {
+                productosCarrito.value[indice].cantidad--;
+                totalPrecio.value = productosCarrito.value[indice].price -= productoDisminuir.price;
+                actualizarLocalStorage();
+            }
+        }
+    }
+
+    const obtenerCantidad = (productoC: Producto) => {
+        const indice = productosCarrito.value.findIndex(producto => producto.id === productoC.id);
+        if (indice !== -1) {
+            return productosCarrito.value[indice].cantidad = productoC.cantidad;
+        }
     }
     
 </script>
@@ -132,7 +184,7 @@
                 </div>
                 <div class="flex items-center justify-between">
                     <span class="text-3xl font-bold text-gray-900 dark:text-white">{{ producto.price }} €</span>
-                    <button @click="agregarAlCarrito(producto)" class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">Add to cart</button>
+                    <button @click="agregarAlCarrito(producto)" class="text-white bg-gradient-to-r from-pink-400 via-pink-500 to-pink-600 hover:bg-gradient-to-br focus:ring-4 focus:outline-none focus:ring-pink-300 dark:focus:ring-pink-800 shadow-lg shadow-pink-500/50 dark:shadow-lg dark:shadow-pink-800/80 font-medium rounded-lg text-sm px-5 py-2.5 text-center me-2 mb-2">Añadir al carrito</button>
                 </div>
                 
             </div>
@@ -155,13 +207,13 @@
                 <div class="mt-4 flex items-center">
                     <span class="mr-2 text-gray-600">Cantidad:</span>
                     <div class="flex items-center">
-                        <button class="bg-gray-200 rounded-l-lg px-2 py-1">-</button>
-                        <span class="mx-2 text-gray-600">1</span>
-                        <button class="bg-gray-200 rounded-r-lg px-2 py-1">+</button>
+                        <button disabled @click="disminuirCantidad(prodCarrito)" class="bg-gray-200 rounded-l-lg px-2 py-1">-</button>
+                        <span class="mx-2 text-gray-600">{{ prodCarrito.cantidad }}</span>
+                        <button @click="aumentarCantidad(prodCarrito)" class="bg-gray-200 rounded-r-lg px-2 py-1">+</button>
                     </div>
                     <span class="ml-2 font-bold">{{ prodCarrito.price }} €</span>
                 </div>
-                <img @click="eliminarDelCarrito(producto)" class="mt-3" width="20px" :src="imgBasura" alt="eliminar_producto">
+                <img @click="eliminarDelCarrito(prodCarrito)" class="mt-3" width="20px" :src="imgBasura" alt="eliminar_producto">
             </div>
         </div>
     </div>
