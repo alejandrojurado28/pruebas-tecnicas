@@ -3,7 +3,8 @@
     import { useRoute, useRouter } from 'vue-router';
     import axios from 'axios';
 
-    const carrito = '/public/Shopping_cart.png'
+    const carrito = '/public/Shopping_cart.png';
+    const imgBasura = '/public/eliminar.png';
 
     // Define una interfaz para representar la estructura del objeto book
     interface Producto {
@@ -38,6 +39,7 @@
     const furgo = '/public/furgoneta.png';
     const productosCarrito = ref<Producto[]>([]);
     const mostrarProdsCarrito = ref(false);
+    const totalPrecio = ref(0)
 
     const obtenerDetallesProducto = async (productoId: number) => {
         try {
@@ -53,6 +55,7 @@
     onMounted(() => {
         const productId = Number(route.params.id);
         obtenerDetallesProducto(productId);
+        cargarProductosDesdeLocalStorage();
     });
 
     const emit = defineEmits(['productos-carrito']);
@@ -60,8 +63,40 @@
     const agregarAlCarrito = (producto: Producto) => {
         productosCarrito.value.push(producto);
         emit('productos-carrito', producto);
+        actualizarLocalStorage();
     }
 
+    const actualizarLocalStorage = () => {
+        localStorage.setItem('productosCarrito', JSON.stringify(productosCarrito.value));
+    }
+
+    const cargarProductosDesdeLocalStorage = () => {
+        const productosGuardados = localStorage.getItem('productosCarrito');
+        if (productosGuardados) {
+            productosCarrito.value = JSON.parse(productosGuardados);
+        }
+    }
+
+    const obtenerPrecioTotal = () => {
+        const total = productosCarrito.value.reduce((total, producto) => total + producto.price, 0);
+        return total;
+    }
+
+    const eliminarDelCarrito = (productoEliminar: Producto) => {
+        const indice = productosCarrito.value.findIndex(producto => producto.id === productoEliminar.id);
+        if (indice !== -1) {
+            productosCarrito.value.splice(indice, 1);
+            actualizarLocalStorage();
+        }
+    }
+
+    const dibujarEstrellas = (puntuacion: number) => {
+        const estrellas = [];
+        for (let i = 0; i < puntuacion; i++) {
+            estrellas.push(i);
+        }
+        return estrellas;
+    }
     
 </script>
 
@@ -87,7 +122,7 @@
                     <p class="text-xs font-semibold tracking-tight text-gray-900 dark:text-white">{{ producto.description }}</p>
                 </a>
                 <div class="flex items-center mt-2.5 mb-5">
-                    <div class="flex items-center space-x-1 rtl:space-x-reverse">
+                    <div v-for="estrella in dibujarEstrellas(Math.round(producto.rating))" class="flex items-center space-x-1 rtl:space-x-reverse">
                         <svg class="w-4 h-4 text-yellow-300" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 22 20">
                             <path d="M20.924 7.625a1.523 1.523 0 0 0-1.238-1.044l-5.051-.734-2.259-4.577a1.534 1.534 0 0 0-2.752 0L7.365 5.847l-5.051.734A1.535 1.535 0 0 0 1.463 9.2l3.656 3.563-.863 5.031a1.532 1.532 0 0 0 2.226 1.616L11 17.033l4.518 2.375a1.534 1.534 0 0 0 2.226-1.617l-.863-5.03L20.537 9.2a1.523 1.523 0 0 0 .387-1.575Z"/>
                         </svg>
@@ -120,20 +155,24 @@
                 <div class="mt-4 flex items-center">
                     <span class="mr-2 text-gray-600">Cantidad:</span>
                     <div class="flex items-center">
-                        <button class="bg-gray-200 rounded-l-lg px-2 py-1" disabled>-</button>
+                        <button class="bg-gray-200 rounded-l-lg px-2 py-1">-</button>
                         <span class="mx-2 text-gray-600">1</span>
-                        <button class="bg-gray-200 rounded-r-lg px-2 py-1" disabled>+</button>
+                        <button class="bg-gray-200 rounded-r-lg px-2 py-1">+</button>
                     </div>
                     <span class="ml-2 font-bold">{{ prodCarrito.price }} €</span>
                 </div>
+                <img @click="eliminarDelCarrito(producto)" class="mt-3" width="20px" :src="imgBasura" alt="eliminar_producto">
             </div>
         </div>
     </div>
     <div class="flex justify-end items-center mt-8">
-        <span class="text-gray-600 mr-4">Subtotal:</span>
-        <span class="text-xl font-bold">$35.00</span>
+        <span class="text-gray-600 mr-4">Total:</span>
+        <span class="text-xl font-bold">{{ obtenerPrecioTotal() }} €</span>
     </div>
     </div>
+    <!--<div v-else>
+        <h2>Cart is empty</h2>
+    </div> -->
     </div>
 </template>
   
