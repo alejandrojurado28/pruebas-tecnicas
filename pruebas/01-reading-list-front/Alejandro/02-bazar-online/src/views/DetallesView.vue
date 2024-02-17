@@ -5,6 +5,19 @@
 
     const carrito = '/public/Shopping_cart.png';
     const imgBasura = '/public/eliminar.png';
+    const router = useRouter();
+    const resultadoBusqueda = ref('');
+
+    // Función para realizar la búsqueda y redirigir al usuario a la página de resultados
+    const busqueda = () => {
+        console.log("Resultado de la búsqueda:", resultadoBusqueda);
+        if (resultadoBusqueda.value !== '') {
+        console.log("Realizando la búsqueda...");
+        router.push({ name: 'Items', query: { search: resultadoBusqueda.value }});
+        } else {
+        console.log("El término de búsqueda está vacío.");
+        }
+    }
 
     // Define una interfaz para representar la estructura del objeto book
     interface Producto {
@@ -45,6 +58,11 @@
     const mostrarProdsCarrito = ref(false);
     const totalPrecio = ref<number>(0);
     const totalCarrito = ref<number>(0);
+    const deshabilitarAnadir = ref(false);
+
+    const volverAlHome = () => {
+        router.push({ name: 'home' });
+    }
 
     const obtenerDetallesProducto = async (productoId: number) => {
         try {
@@ -66,6 +84,8 @@
     const agregarAlCarrito = (producto: Producto) => {
         // Clonar el producto para evitar referencias
         const productoClonado = {...producto};
+        // Establecer la cantidad del producto clonado a 1
+        productoClonado.cantidad = 1;
         // Actualizar el precio del producto clonado con el nuevo precio
         productoClonado.nuevoprecio = productoClonado.price;
         // Agregar el producto clonado al carrito
@@ -74,6 +94,7 @@
         totalCarrito.value += productoClonado.price;
         // Actualizar el total del precio
         totalPrecio.value += productoClonado.price;
+        deshabilitarAnadir.value = productoClonado.cantidad === 1
         // Actualizar el local storage
         actualizarLocalStorage();
     }
@@ -92,7 +113,6 @@
             totalCarrito.value = parseFloat(cantidadesGuardadas);
         }
     }
-
     const obtenerPrecioTotal = () => {
         totalPrecio.value = productosCarrito.value.reduce((total, producto) => total + producto.nuevoprecio, 0);
         return totalPrecio;
@@ -124,11 +144,9 @@
             totalCarrito.value += productoAnadir.price;
             // Sumar el precio del producto al totalPrecio
             totalPrecio.value += productoAnadir.price;
+            localStorage.setItem('totalCarrito', totalCarrito.value.toString());
             // Actualizar el local storage
             actualizarLocalStorage();
-            localStorage.setItem('totalCarrito', totalCarrito.value.toString());
-            // Recalcular el total del precio
-            obtenerPrecioTotal();
         }
     }
 
@@ -136,17 +154,16 @@
         const indice = productosCarrito.value.findIndex(producto => producto.id === productoDisminuir.id);
         if (indice !== -1) {
             if (productosCarrito.value[indice].cantidad > 1) {
+                // Restar la cantidad y el precio del producto
                 productosCarrito.value[indice].cantidad--;
-                totalPrecio.value = productosCarrito.value[indice].price -= productoDisminuir.price;
+                productosCarrito.value[indice].nuevoprecio -= productoDisminuir.price;
+                // Actualizar el total del carrito
+                totalCarrito.value -= productoDisminuir.price;
+                // Actualizar el total del precio
+                totalPrecio.value -= productoDisminuir.price;
+                // Actualizar el local storage
                 actualizarLocalStorage();
             }
-        }
-    }
-
-    const obtenerCantidad = (productoC: Producto) => {
-        const indice = productosCarrito.value.findIndex(producto => producto.id === productoC.id);
-        if (indice !== -1) {
-            return productosCarrito.value[indice].cantidad = productoC.cantidad;
         }
     }
     
@@ -154,9 +171,9 @@
 
 <template>
     <div class="mb-2 mt-4 fuente flex content-center justify-center font-serif w-auto h-auto">
-        <img width="60px" :src="furgo" alt="img_furgoneta">
-        <input class="mr-4 ml-4 bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" type="text">
-        <button class="text-white bg-gradient-to-r from-pink-400 via-pink-500 to-pink-600 hover:bg-gradient-to-br focus:ring-4 focus:outline-none focus:ring-pink-300 dark:focus:ring-pink-800 font-medium rounded-lg text-sm px-5 py-2.5 text-center me-2 mb-2">Buscar</button>
+        <img @click="volverAlHome" width="60px" :src="furgo" alt="img_furgoneta">
+        <input v-model="resultadoBusqueda" class="mr-4 ml-4 bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" type="text">
+        <button @click="busqueda" class="text-white bg-gradient-to-r from-pink-400 via-pink-500 to-pink-600 hover:bg-gradient-to-br focus:ring-4 focus:outline-none focus:ring-pink-300 dark:focus:ring-pink-800 font-medium rounded-lg text-sm px-5 py-2.5 text-center me-2 mb-2">Buscar</button>
     </div>
     <div class="flex justify-center items-center min-h-screen">
         <div class="w-full max-w-lg bg-white border border-gray-200 rounded-lg shadow dark:bg-gray-800 dark:border-gray-700">
@@ -164,7 +181,7 @@
                 <img class="p-8 rounded-t-lg" :src="producto.thumbnail" :alt="producto.title" />
             </a>
             <div class="flex mb-4 ml-4 mr-4">
-                <div v-for="(image, index) in producto.images" :key="index">
+                <div class="mr-4" v-for="(image, index) in producto.images" :key="index">
                     <img :src="image" alt="Imagen-producto" class="rounded-full w-20 h-20">
                 </div>
             </div>
@@ -184,7 +201,7 @@
                 </div>
                 <div class="flex items-center justify-between">
                     <span class="text-3xl font-bold text-gray-900 dark:text-white">{{ producto.price }} €</span>
-                    <button @click="agregarAlCarrito(producto)" class="text-white bg-gradient-to-r from-pink-400 via-pink-500 to-pink-600 hover:bg-gradient-to-br focus:ring-4 focus:outline-none focus:ring-pink-300 dark:focus:ring-pink-800 shadow-lg shadow-pink-500/50 dark:shadow-lg dark:shadow-pink-800/80 font-medium rounded-lg text-sm px-5 py-2.5 text-center me-2 mb-2">Añadir al carrito</button>
+                    <button @click="agregarAlCarrito(producto)" :disabled="deshabilitarAnadir" class="text-white bg-gradient-to-r from-pink-400 via-pink-500 to-pink-600 hover:bg-gradient-to-br focus:ring-4 focus:outline-none focus:ring-pink-300 dark:focus:ring-pink-800 shadow-lg shadow-pink-500/50 dark:shadow-lg dark:shadow-pink-800/80 font-medium rounded-lg text-sm px-5 py-2.5 text-center me-2 mb-2">Añadir al carrito</button>
                 </div>
                 
             </div>
@@ -207,7 +224,7 @@
                 <div class="mt-4 flex items-center">
                     <span class="mr-2 text-gray-600">Cantidad:</span>
                     <div class="flex items-center">
-                        <button disabled @click="disminuirCantidad(prodCarrito)" class="bg-gray-200 rounded-l-lg px-2 py-1">-</button>
+                        <button @click="disminuirCantidad(prodCarrito)" class="bg-gray-200 rounded-l-lg px-2 py-1">-</button>
                         <span class="mx-2 text-gray-600">{{ prodCarrito.cantidad }}</span>
                         <button @click="aumentarCantidad(prodCarrito)" class="bg-gray-200 rounded-r-lg px-2 py-1">+</button>
                     </div>
